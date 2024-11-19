@@ -4,6 +4,7 @@ const { registerUser, loginUser, requestPasswordReset, resetPassword } = require
 
 const router = express.Router();
 
+//TODO:TO implment swagger
 // Registration route
 router.post('/register', registerUser);
 
