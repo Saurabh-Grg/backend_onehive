@@ -21,3 +21,6 @@ sequelize.authenticate()
   });
 
 module.exports = sequelize; // Export the Sequelize instance
+
+
+//saurabh
