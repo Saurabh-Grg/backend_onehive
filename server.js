@@ -41,15 +41,15 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Import Routes
 const authRoutes = require('./routes/auth');
 // const clientProfileRoutes = require('./routes/clientProfile');
-// const jobPostingRoutes = require('./routes/jobPosting'); // Import job posting routes
+const jobPostingRoutes = require('./routes/jobPosting'); // Import job posting routes
 const upload = require('./config/multer'); // Multer configuration imported here
-// const proposalRoutes = require('./routes/proposal');  // Import proposal routes
+const proposalRoutes = require('./routes/proposal');  // Import proposal routes
 
 // Use Routes
 app.use('/api/auth', authRoutes); // Authentication endpoints
 // app.use('/api/clientProfile', clientProfileRoutes); // Client profile creation endpoints
-// app.use('/api/jobPosting', jobPostingRoutes); // Job posting endpoints
-// app.use('/api/proposals', proposalRoutes); // Register proposal routes
+app.use('/api/jobPosting', jobPostingRoutes); // Job posting endpoints
+app.use('/api/proposals', proposalRoutes); // Register proposal routes
 
 
 // Route for handling profile image upload
