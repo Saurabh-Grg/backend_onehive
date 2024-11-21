@@ -80,56 +80,6 @@ const loginUser = async (req, res) => {
   }
 };
 
-// Request password reset
-// const requestPasswordReset = (req, res) => {
-//   const { email } = req.body;
-
-//   if (!email) {
-//     return res.status(400).json({ message: 'Please provide an email address' });
-//   }
-
-//   const token = passwordResetService.generateResetToken(email);
-
-//   // Send email with the reset token
-//   emailService.sendPasswordResetEmail(email, token)
-//     .then(() => res.status(200).json({ message: 'Password reset email sent' }))
-//     .catch(err => res.status(500).json({ message: 'Error sending email', error: err.message }));
-// };
-// Request password reset
-// const requestPasswordReset = async (req, res) => {
-//   const { email } = req.body;
-
-//   if (!email) {
-//     return res.status(400).json({ message: 'Please provide an email address' });
-//   }
-
-//   try {
-//     const token = await passwordResetService.generateResetToken(email); // Await the token here
-
-//     // Send email with the reset token
-//     await emailService.sendPasswordResetEmail(email, token);
-    
-//     res.status(200).json({ message: 'Password reset email sent' });
-//   } catch (err) {
-//     res.status(500).json({ message: 'Error processing password reset', error: err.message });
-//   }
-// };
-
-// // Reset password
-// const resetPassword = (req, res) => {
-//   const { token, newPassword } = req.body;
-
-//   if (!token || !newPassword) {
-//     return res.status(400).json({ message: 'Please provide token and new password' });
-//   }
-
-//   passwordResetService.resetPassword(token, newPassword, (err, message) => {
-//     if (err) {
-//       return res.status(400).json({ message: err.message });
-//     }
-//     res.status(200).json({ message });
-//   });
-// };
 
 // Request password reset
 const requestPasswordReset = async (req, res) => {

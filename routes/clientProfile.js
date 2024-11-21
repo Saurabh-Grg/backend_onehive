@@ -1,0 +1,38 @@
+// routes/clientProfile.js
+const express = require('express');
+const router = express.Router();
+const clientProfileController = require('../controllers/clientProfileController');
+const upload = require('../config/multer');
+const authenticateUser = require('../middleware/auth'); // Import the auth middleware
+const ClientProfile = require('../models/clientProfileModel');
+
+// POST request to create client profile with image upload
+router.post('/client-profile', authenticateUser, upload.single('profileImage'), clientProfileController.createClientProfile);
+
+
+//this was added
+// routes/clientProfile.js
+router.put('/client-profile/:id', authenticateUser, upload.single('profileImage'), clientProfileController.updateClientProfile);
+
+
+// GET request to fetch client profile
+router.get('/client-profile', authenticateUser, clientProfileController.getClientProfile);
+
+router.get('/check-profile/:user_id', async (req, res) => {
+    const user_id = req.params.user_id;
+    try {
+        const profile = await ClientProfile.findOne({ where: { user_id: user_id } });
+        if (profile) {
+            return res.status(200).json({ profileExists: true });
+        } else {
+            return res.status(200).json({ profileExists: false });
+        }
+    } catch (error) {
+        console.error("Error checking profile existence:", error);
+        return res.status(500).json({ error: "Server error" });
+    }
+});
+
+
+
+module.exports = router;
