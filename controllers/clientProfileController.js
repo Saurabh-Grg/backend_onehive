@@ -45,34 +45,39 @@ const createClientProfile = async (req, res) => {
 // controllers/clientProfileController.js
 const updateClientProfile = async (req, res) => {
   try {
-      const user = req.user;
-      const profileId = req.params.id;
+    const user = req.user;
+    const profileId = req.params.id;
 
-      if (!user || !user.user_id) {
-          return res.status(401).json({ message: 'Unauthorized: No user logged in.' });
-      }
+    // Ensure user is authenticated
+    if (!user || !user.user_id) {
+      return res.status(401).json({ message: 'Unauthorized: No user logged in.' });
+    }
 
-      // Initialize profile data with incoming request body
-      const profileData = req.body;
+    // Extract the profile data from the request body
+    const profileData = req.body;
 
-      // Check if a new file is uploaded
-      if (req.file) {
-          const serverUrl = 'http://localhost:3000'; // Replace with your server's base URL
-          profileData.profileImageUrl = `${serverUrl}/api/uploads/profile-images/${req.file.filename}`; // Store the complete URL
-      }
+    // Check if a new file is uploaded and update the profile image URL
+    if (req.file) {
+      const serverUrl = 'http://localhost:3000'; // Replace with your server's base URL
+      profileData.profileImageUrl = `${serverUrl}/uploads/profile-images/${req.file.filename}`;
+    }
 
-      const profile = await clientProfileService.updateClientProfile(profileId, profileData);
-      res.status(200).json({
-          message: 'Client profile updated successfully',
-          data: profile
-      });
+    // Update the client profile
+    const updatedProfile = await clientProfileService.updateClientProfile(profileId, profileData);
+
+    // Return a success response
+    res.status(200).json({
+      message: 'Client profile updated successfully',
+      data: updatedProfile,
+    });
   } catch (error) {
-      console.error("Error in profile update:", error.message);
-      res.status(500).json({
-          message: error.message
-      });
+    console.error('Error in profile update:', error.message);
+    res.status(500).json({
+      message: error.message,
+    });
   }
 };
+
 
 
 //profile fetch

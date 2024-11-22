@@ -33,6 +33,8 @@ router.get('/check-profile/:user_id', async (req, res) => {
     }
 });
 
+// PUT request to update client profile with image upload
+router.put('/client-profile/update/:id', authenticateUser, upload.single('profileImage'), clientProfileController.updateClientProfile);
 
 
 module.exports = router;

@@ -29,16 +29,19 @@ const getClientProfile = async (userId) => {
 // services/clientProfileService.js
 
 const updateClientProfile = async (profileId, profileData) => {
-    try {
-        const profile = await ClientProfile.findByPk(profileId);
-        if (!profile) {
-            throw new Error('Profile not found');
-        }
-        await profile.update(profileData);
-        return profile;
-    } catch (error) {
-        throw new Error('Error updating client profile: ' + error.message);
+  try {
+    // Find the profile by ID
+    const profile = await ClientProfile.findByPk(profileId);
+    if (!profile) {
+      throw new Error('Profile not found');
     }
+
+    // Update the profile with the new data
+    await profile.update(profileData);
+    return profile;
+  } catch (error) {
+    throw new Error('Error updating client profile: ' + error.message);
+  }
 };
 
 module.exports = {
