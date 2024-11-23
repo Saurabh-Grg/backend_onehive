@@ -41,18 +41,20 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Import Routes
 const authRoutes = require('./routes/auth');
 const clientProfileRoutes = require('./routes/clientProfile');
+const freelancerProfileRoutes = require('./routes/freelancerProfile');
 const jobPostingRoutes = require('./routes/jobPosting'); // Import job posting routes
-const upload = require('./config/multer'); // Multer configuration imported here
+const upload  = require('./config/multer'); // Multer configuration imported here
 const proposalRoutes = require('./routes/proposal');  // Import proposal routes
 
 // Use Routes
 app.use('/api/auth', authRoutes); // Authentication endpoints
 app.use('/api/clientProfile', clientProfileRoutes); // Client profile creation endpoints
+app.use('/api/freelancerProfile', freelancerProfileRoutes);
 app.use('/api/jobPosting', jobPostingRoutes); // Job posting endpoints
 app.use('/api/proposals', proposalRoutes); // Register proposal routes
 
 
-// Route for handling profile image upload
+// // Route for handling profile image upload
 app.post('/uploads/profile-image', upload.single('profileImage'), (req, res) => {
   if (req.file) {
     // If a file was uploaded
@@ -61,6 +63,32 @@ app.post('/uploads/profile-image', upload.single('profileImage'), (req, res) => 
   // If no file was uploaded, return a success response without the image URL
   return res.json({ message: 'No image uploaded', profileImageUrl: null });
 });
+
+// // Route for uploading profile image
+// app.post('/upload-profile-image', uploadProfileImage.single('profileImage'), (req, res) => {
+//   if (req.file) {
+//     return res.json({ profileImageUrl: `/uploads/profile-images/${req.file.filename}` });
+//   }
+//   return res.json({ message: 'No profile image uploaded' });
+// });
+
+// Route for uploading multiple portfolio images
+// app.post('/upload-portfolio-images', uploadPortfolioImages, (req, res) => {
+//   if (req.files) {
+//     const portfolioImageUrls = req.files.map(file => `/uploads/portfolio-images/${file.filename}`);
+//     return res.json({ portfolioImageUrls });
+//   }
+//   return res.json({ message: 'No portfolio images uploaded' });
+// });
+
+// // Route for uploading multiple certificates
+// app.post('/upload-certificates', uploadCertificates, (req, res) => {
+//   if (req.files) {
+//     const certificateUrls = req.files.map(file => `/uploads/certificates/${file.filename}`);
+//     return res.json({ certificateUrls });
+//   }
+//   return res.json({ message: 'No certificates uploaded' });
+// });
 
 // Start the server
 const PORT = process.env.PORT || 3000;
