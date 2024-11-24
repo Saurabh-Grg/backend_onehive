@@ -38,62 +38,59 @@ const upload = multer({
   }
 });
 
+//TODO: multiple images uploading is not done
+
 module.exports = upload;
 
 // const multer = require('multer');
 // const path = require('path');
 
-// // Helper function to get storage configuration for different file types
-// const getStorageConfig = (folder) => multer.diskStorage({
+// // Multer storage configuration
+// const storage = multer.diskStorage({
 //   destination: (req, file, cb) => {
-//     cb(null, `uploads/${folder}`); // Save to the respective folder
+//     // Different folders for different fields
+//     if (file.fieldname === 'profileImage') {
+//       cb(null, 'uploads/profile-images'); // Directory for profile images
+//     } else if (file.fieldname === 'portfolioImages') {
+//       cb(null, 'uploads/portfolio-images'); // Directory for portfolio images
+//     } else if (file.fieldname === 'certificates') {
+//       cb(null, 'uploads/certificates'); // Directory for certificates
+//     } else {
+//       cb(new Error('Unexpected field')); // Error if an unexpected field is encountered
+//     }
 //   },
 //   filename: (req, file, cb) => {
-//     // Add timestamp to filename to avoid name collisions
+//     // Generate unique filenames
 //     cb(null, `${Date.now()}-${file.originalname}`);
 //   }
 // });
 
-// // General file filter for validating image extensions and MIME types
+// // File filter to allow only images
 // const fileFilter = (req, file, cb) => {
 //   const allowedExtensions = ['.jpeg', '.jpg', '.png'];
-//   const allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png'];
-
 //   const fileExtension = path.extname(file.originalname).toLowerCase();
-//   const fileMimeType = file.mimetype.toLowerCase();
 
-//   // Validate file type
-//   if (allowedExtensions.includes(fileExtension) && allowedMimeTypes.includes(fileMimeType)) {
+//   if (allowedExtensions.includes(fileExtension)) {
 //     cb(null, true);
 //   } else {
-//     const errorMsg = `Only images are allowed (jpeg, jpg, png). Received: ${fileMimeType}`;
-//     cb(new Error(errorMsg));
+//     cb(new Error('Invalid file type. Only JPEG, JPG, and PNG files are allowed.'));
 //   }
 // };
 
-// // Multer instance for uploading profile images
-// const uploadProfileImage = multer({
-//   storage: getStorageConfig('profile-images'),
-//   limits: { fileSize: 5 * 1024 * 1024 }, // Max 5MB
-//   fileFilter,
+// // Multer configuration
+// const upload = multer({
+//   storage,
+//   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB file size limit per file
+//   fileFilter
 // });
 
-// // Multer instance for uploading multiple portfolio images
-// const uploadPortfolioImages = multer({
-//   storage: getStorageConfig('portfolio-images'),
-//   limits: { fileSize: 5 * 1024 * 1024 }, // Max 5MB per image
-//   fileFilter,
-// }).array('portfolioImages', 5); // Limit to 5 files, adjust as necessary
+// // Export the upload configuration with fields for multiple inputs
+// const multiUpload = upload.fields([
+//   { name: 'profileImage', maxCount: 1 },       // Single profile image
+//   { name: 'portfolioImages', maxCount: 10 },  // Up to 10 portfolio images
+//   { name: 'certificates', maxCount: 10 }      // Up to 10 certificate images
+// ]);
 
-// // Multer instance for uploading multiple certificates
-// const uploadCertificates = multer({
-//   storage: getStorageConfig('certificates'),
-//   limits: { fileSize: 5 * 1024 * 1024 }, // Max 5MB per image
-//   fileFilter,
-// }).array('certificateImages', 5); // Limit to 5 files, adjust as necessary
+// module.exports = multiUpload;
 
-// module.exports = {
-//   uploadProfileImage,
-//   uploadPortfolioImages,
-//   uploadCertificates
-// };
+
