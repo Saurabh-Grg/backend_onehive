@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const { storeTempJobDetails, submitBackendJob, submitFrontendJob, submitFullStackJob , getTotalJobPostings, getJobs, getJobDetails, getAllJobs } = require('../controllers/jobPostingController');
+const authenticateUser = require('../middleware/auth'); // Import the auth middleware
+const { storeTempJobDetails, submitBackendJob, submitFrontendJob, submitFullStackJob , getTotalJobPostings, getJobs, getJobDetails, getAllJobs , deleteJob } = require('../controllers/jobPostingController');
 
 // Step 1: Temporarily store common job details
 router.post('/store-temp-job', storeTempJobDetails);
@@ -31,5 +32,7 @@ router.get('/jobs', getAllJobs);
 
 // Fetch common job and category-specific details by job_id
 router.get('/jobDetails/:job_id', getJobDetails);
+
+router.delete("/:job_id", authenticateUser, deleteJob);
 
 module.exports = router;

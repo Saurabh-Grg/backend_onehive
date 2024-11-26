@@ -261,6 +261,28 @@ const getAllJobs = async (req, res) => {
     }
 };
 
+const deleteJob = async (req, res) => {
+    const { job_id } = req.params;
+  
+    try {
+      const job = await Job.findByPk(job_id);
+  
+      if (!job) {
+        return res.status(404).json({ message: 'Job not found' });
+      }
+  
+      if (job.user_id !== req.user.user_id) {
+        return res.status(403).json({ message: 'Unauthorized' });
+      }
+  
+      await job.destroy();
+      res.status(200).json({ message: 'Job deleted successfully' });
+    } catch (error) {
+      res.status(500).json({ message: 'Server error', error: error.message });
+    }
+  };
+  
+
 
 module.exports = {
     storeTempJobDetails,
@@ -271,6 +293,7 @@ module.exports = {
     getJobs,
     getJobDetails,
     getAllJobs,  // New function to fetch all jobs
+    deleteJob
 };
 
 
