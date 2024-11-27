@@ -41,14 +41,22 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  reset_password_token: {
+  otp: {
     type: DataTypes.STRING,
     allowNull: true,
   },
-  reset_password_expires: {
+  otpExpiry: {
     type: DataTypes.DATE,
     allowNull: true,
   },
+  // reset_password_token: {
+  //   type: DataTypes.STRING,
+  //   allowNull: true,
+  // },
+  // reset_password_expires: {
+  //   type: DataTypes.DATE,
+  //   allowNull: true,
+  // },
   
 }, {
   timestamps: true, // Automatically includes createdAt and updatedAt fields

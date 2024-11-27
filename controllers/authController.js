@@ -1,7 +1,8 @@
 // controllers/authController.js
 const registerUserService = require('../services/register');
-const passwordResetService = require('../services/passwordReset');
-const emailService = require('../utils/email');
+// const passwordResetService = require('../services/passwordReset');
+const nodemailer = require('nodemailer');
+
 const db = require('../config/db');
 const User = require('../models/userModel');
 const jwt = require('jsonwebtoken'); // Import JWT for token generation
@@ -80,47 +81,104 @@ const loginUser = async (req, res) => {
   }
 };
 
-
-// Request password reset
-const requestPasswordReset = async (req, res) => {
+// Step 1: Generate OTP and send to email
+const forgotPassword = async (req, res) => {
   const { email } = req.body;
-
-  if (!email) {
-    return res.status(400).json({ message: 'Please provide an email address' });
-  }
+  console.log('Email in forgotPassword:', email); 
 
   try {
-    const token = await passwordResetService.generateResetToken(email);
+      const user = await User.findOne({ where: { email } });
 
-    // Send email with the reset token
-    const resetLink = `http://localhost:3000/reset-password?token=${token}`;
-    await emailService.sendPasswordResetEmail(email, resetLink);
+      if (!user) {
+          return res.status(404).json({ message: 'Email not registered' });
+      }
 
-    res.status(200).json({ message: 'Password reset email sent' });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Error processing password reset', error: err.message });
+      // Generate a random OTP (6 digits)
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+
+      // Save OTP to the user model or cache for validation
+      user.otp = otp;
+      user.otpExpiry = Date.now() + 10 * 60 * 1000; // OTP expires in 10 minutes
+      await user.save();
+
+      // Send OTP via email using Nodemailer
+      const transporter = nodemailer.createTransport({
+          service: 'Gmail',
+          auth: {
+              user: process.env.EMAIL_USER,
+              pass: process.env.EMAIL_PASS,
+          },
+      });
+
+      const mailOptions = {
+          from: process.env.EMAIL_USER,
+          to: email,
+          subject: 'Password Reset OTP',
+          text: `Dear ${user.username},\n\nYour OTP for password reset is: ${otp}.\n\nThank you,\nOneHive Team`,
+      };
+
+      await transporter.sendMail(mailOptions);
+
+      res.status(200).json({ message: 'OTP sent to your email' });
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Server error' });
   }
 };
 
-// Reset password
+
+// Step 2: Verify OTP (New route)
+const verifyOtp = async (req, res) => {
+  console.log('Request body in verifyOtp:', req.body); // Log request body
+  const { email, otp } = req.body;
+  console.log('Email in verifyOtp:', email, 'OTP:', otp); // Log email and otp
+
+  try {
+      const user = await User.findOne({ where: { email } });
+
+      if (!user || user.otp !== otp || user.otpExpiry < Date.now()) {
+          return res.status(400).json({ message: 'Invalid or expired OTP' });
+      }
+
+      // OTP is valid; Clear OTP fields but inform the client that verification was successful
+      user.otp = null;
+      user.otpExpiry = null;
+      await user.save();
+
+      res.status(200).json({ message: 'OTP verified successfully' });
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Step 3: Reset Password (Only after OTP verification)
 const resetPassword = async (req, res) => {
-  const { token, newPassword } = req.body;
-
-  if (!token || !newPassword) {
-    return res.status(400).json({ message: 'Please provide a token and a new password' });
-  }
+  const { email, newPassword, confirmPassword } = req.body;
 
   try {
-    const message = await passwordResetService.resetPassword(token, newPassword);
-    res.status(200).json({ message });
-  } catch (err) {
-    console.error(err);
-    res.status(400).json({ message: err.message });
+      const user = await User.findOne({ where: { email } });
+
+      if (!user) {
+          return res.status(404).json({ message: 'User not found' });
+      }
+
+      if (newPassword !== confirmPassword) {
+          console.log('Password mismatch error');
+          return res.status(400).json({ message: 'Passwords do not match' });
+      }
+
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      user.password = hashedPassword;
+      await user.save();
+
+      res.status(200).json({ message: 'Password reset successful' });
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Server error' });
   }
 };
-
-
 
 // Fetch user details after login to display role-based options
 const getUserDetails = (req, res) => {
@@ -140,7 +198,6 @@ const getUserDetails = (req, res) => {
     }
   });
 };
-
 
 
 const createProfile = (req, res) => {
@@ -168,7 +225,8 @@ const createProfile = (req, res) => {
 module.exports = {
   registerUser,
   loginUser,
-  requestPasswordReset,
+  forgotPassword,
+  verifyOtp,
   resetPassword,
   getUserDetails,
   createProfile,
