@@ -1,3 +1,4 @@
+//models/jobPostingModel.js
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 const User = require('./userModel'); 
@@ -39,6 +40,9 @@ const Job = sequelize.define('Job', {
         onDelete: 'CASCADE', // Optional: Deletes the client profile if the associated user is deleted
         onUpdate: 'CASCADE', // Optional: Updates the client profile if the associated user's ID changes
       },
+      payment_status: {
+        type: DataTypes.ENUM('unpaid', 'paid', 'escrowed'),
+      }
 }, {
     timestamps: true,
     tableName: 'jobs'
