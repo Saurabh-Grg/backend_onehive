@@ -46,6 +46,9 @@ const jobPostingRoutes = require('./routes/jobPosting'); // Import job posting r
 const upload  = require('./config/multer'); // Multer configuration imported here
 const proposalRoutes = require('./routes/proposal');  // Import proposal routes
 
+// const paymentRoutes = require("./routes/payment");
+// app.use("/payment", paymentRoutes);
+
 // Use Routes
 app.use('/api/auth', authRoutes); // Authentication endpoints
 app.use('/api/clientProfile', clientProfileRoutes); // Client profile creation endpoints
@@ -74,4 +77,8 @@ app.listen(PORT, () => {
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send('Something broke!');
+});
+
+app.get("/", function (req, res) {
+  res.sendFile(__dirname + "/test.html");
 });

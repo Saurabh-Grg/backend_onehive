@@ -20,19 +20,23 @@ const FreelancerProfile = sequelize.define('FreelancerProfile', {
   },
   name: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
   bio: {
     type: DataTypes.TEXT,
+    allowNull: true,
   },
   skills: {
     type: DataTypes.STRING,
+    allowNull: true,
   },
   experience: {
     type: DataTypes.TEXT,
+    allowNull: true,
   },
   education: {
     type: DataTypes.STRING,
+    allowNull: true,
   },
   profileImageUrl: {
     type: DataTypes.STRING,
