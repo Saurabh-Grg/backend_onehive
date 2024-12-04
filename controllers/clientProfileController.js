@@ -4,6 +4,7 @@ const clientProfileService = require('../services/clientProfileService');
 const createClientProfile = async (req, res) => {
   try {
     console.log("Incoming request body:", req.body); // Log incoming request body
+    console.log("Uploaded files:", req.files);  // Log uploaded files to verify if 'profileImage' exists
 
     const user = req.user;
 
@@ -21,10 +22,10 @@ const createClientProfile = async (req, res) => {
     // Set user_id to the authenticated user's ID
     profileData.user_id = req.user.user_id;
 
-    // Check if a file is uploaded
-    if (req.file) {
+    // Check if the profileImage file is uploaded
+    if (req.files && req.files.profileImage && req.files.profileImage[0]) {
       const serverUrl = 'http://localhost:3000'; // Replace with your server's base URL
-      profileData.profileImageUrl = `${serverUrl}/uploads/profile-images/${req.file.filename}`; // Store the complete URL
+      profileData.profileImageUrl = `${serverUrl}/uploads/profile-images/${req.files.profileImage[0].filename}`; // Store the complete URL
     }
 
     const newProfile = await clientProfileService.createClientProfile(profileData);
@@ -78,18 +79,35 @@ const updateClientProfile = async (req, res) => {
   }
 };
 
-
-
-//profile fetch
 const getClientProfile = async (req, res) => {
   try {
     const user = req.user;
 
+    // Debugging: Log the user object
+    console.log("User in request:", user);
+
+    // Ensure user is authenticated
     if (!user || !user.user_id) {
       return res.status(401).json({ message: 'Unauthorized: No user logged in.' });
     }
 
+    // Fetch the profile from the service
     const profile = await clientProfileService.getClientProfile(user.user_id);
+    
+    // Debugging: Log the raw profile data fetched from the database
+    console.log("Fetched Profile Data:", profile);
+
+    // Check if the profile is found
+    if (!profile || !profile.profileImageUrl) {
+      console.warn("No profile image URL found in fetched profile.");
+    }
+
+    // Log the final response before sending it
+    console.log("Response being sent:", {
+      message: 'Client profile fetched successfully',
+      data: profile
+    });
+
     res.status(200).json({
       message: 'Client profile fetched successfully',
       data: profile
@@ -101,7 +119,6 @@ const getClientProfile = async (req, res) => {
     });
   }
 };
-
 
 
 module.exports = {

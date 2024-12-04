@@ -9,10 +9,12 @@ const FreelancerProfile = require('../models/freelancerProfileModel'); // Adjust
 // const upload = multer({ dest: 'uploads/profile-images/' });
 
 // Route for creating freelancer profile
-router.post('/create', authenticateUser, upload.single('profileImage'), freelancerProfileController.createFreelancerProfile);
+// router.post('/create', authenticateUser, upload.single('profileImage'), freelancerProfileController.createFreelancerProfile);
+router.post('/create', authenticateUser, upload, freelancerProfileController.createFreelancerProfile);
 
 // Route for updating freelancer profile
-router.put('/:id', upload.single('profileImage'), freelancerProfileController.updateFreelancerProfile);
+// router.put('/:id', upload.single('profileImage'), freelancerProfileController.updateFreelancerProfile);
+router.put('/:id', upload, freelancerProfileController.updateFreelancerProfile);
 
 // Route for fetching freelancer profile
 router.get('/', authenticateUser, freelancerProfileController.getFreelancerProfile);

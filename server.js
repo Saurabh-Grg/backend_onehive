@@ -56,7 +56,7 @@ app.use('/api/freelancerProfile', freelancerProfileRoutes);
 app.use('/api/jobPosting', jobPostingRoutes); // Job posting endpoints
 app.use('/api/proposals', proposalRoutes); // Register proposal routes
 
-app.post('/uploads/profile-image', upload.single('profileImage'), (req, res) => {
+app.post('/uploads/profile-image', upload, (req, res) => {
   if (req.file) {
     // If a file was uploaded
     return res.json({ profileImageUrl: `/uploads/profile-images/${req.file.filename}` });

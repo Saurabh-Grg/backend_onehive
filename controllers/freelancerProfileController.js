@@ -18,10 +18,22 @@ const createFreelancerProfile = async (req, res) => {
     // Set user_id to the authenticated user's ID
     profileData.user_id = req.user.user_id;
 
-    // Check if a file is uploaded
-    if (req.file) {
+    // Check if a profile image is uploaded
+    if (req.files && req.files.profileImage) {
       const serverUrl = 'http://localhost:3000'; // Replace with your server's base URL
-      profileData.profileImageUrl = `${serverUrl}/uploads/profile-images/${req.file.filename}`; // Store the complete URL
+      profileData.profileImageUrl = `${serverUrl}/uploads/profile-images/${req.files.profileImage[0].filename}`; // Store the complete URL
+    }
+
+    // Check if portfolio images are uploaded
+    if (req.files && req.files.portfolioImages) {
+      const serverUrl = 'http://localhost:3000'; // Replace with your server's base URL
+      profileData.portfolioImages = req.files.portfolioImages.map(file => `${serverUrl}/uploads/portfolio-images/${file.filename}`);
+    }
+
+    // Check if certificates are uploaded
+    if (req.files && req.files.certificates) {
+      const serverUrl = 'http://localhost:3000'; // Replace with your server's base URL
+      profileData.certificates = req.files.certificates.map(file => `${serverUrl}/uploads/certificates/${file.filename}`);
     }
 
     const newProfile = await freelancerProfileService.createFreelancerProfile(profileData);
