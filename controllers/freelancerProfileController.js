@@ -88,6 +88,8 @@ const updateFreelancerProfile = async (req, res) => {
 // Fetch freelancer profile
 const getFreelancerProfile = async (req, res) => {
   try {
+    console.log('Incoming request to fetch freelancer profile:', req.user);
+
     const user = req.user;
 
     if (!user || !user.user_id) {
@@ -95,6 +97,9 @@ const getFreelancerProfile = async (req, res) => {
     }
 
     const profile = await freelancerProfileService.getFreelancerProfile(user.user_id);
+
+    console.log('Profile fetched:', profile);
+
     res.status(200).json({
       message: 'Freelancer profile fetched successfully',
       data: profile
@@ -106,6 +111,7 @@ const getFreelancerProfile = async (req, res) => {
     });
   }
 };
+
 
 module.exports = {
   createFreelancerProfile,

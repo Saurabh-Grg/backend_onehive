@@ -3,6 +3,14 @@ const FreelancerProfile = require('../models/freelancerProfileModel');
 // Create a new freelancer profile
 const createFreelancerProfile = async (profileData) => {
   try {
+    // Make sure portfolioImages and certificates are arrays, not strings
+    if (typeof profileData.portfolioImages === 'string') {
+      profileData.portfolioImages = JSON.parse(profileData.portfolioImages);
+    }
+    if (typeof profileData.certificates === 'string') {
+      profileData.certificates = JSON.parse(profileData.certificates);
+    }
+
     const newProfile = await FreelancerProfile.create(profileData);
     return newProfile;
   } catch (error) {
@@ -10,18 +18,50 @@ const createFreelancerProfile = async (profileData) => {
   }
 };
 
-// Fetch the freelancer profile by user ID
 const getFreelancerProfile = async (userId) => {
   try {
-    const profile = await FreelancerProfile.findOne({ where: { user_id: userId } });
+    const profile = await FreelancerProfile.findOne({
+      where: { user_id: userId },
+      attributes: [
+        'id',
+        'user_id',
+        'name',
+        'bio',
+        'skills',
+        'experience',
+        'education',
+        'profileImageUrl',
+        'portfolioImages',
+        'certificates',
+        'createdAt',
+        'updatedAt'
+      ]
+    });
+
     if (!profile) {
       throw new Error('Freelancer profile not found');
     }
-    return profile;
+
+    const parsedProfile = profile.get({ plain: true });
+
+    // If portfolioImages and certificates are stored as strings, parse them into arrays
+    if (typeof parsedProfile.portfolioImages === 'string') {
+      parsedProfile.portfolioImages = JSON.parse(parsedProfile.portfolioImages);
+    }
+
+    if (typeof parsedProfile.certificates === 'string') {
+      parsedProfile.certificates = JSON.parse(parsedProfile.certificates);
+    }
+
+    return parsedProfile;
   } catch (error) {
+    console.error('Error fetching freelancer profile:', error);
     throw new Error('Error fetching freelancer profile: ' + error.message);
   }
 };
+
+
+
 
 // Update the freelancer profile
 const updateFreelancerProfile = async (profileId, profileData) => {
