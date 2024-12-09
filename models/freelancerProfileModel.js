@@ -43,12 +43,30 @@ const FreelancerProfile = sequelize.define('FreelancerProfile', {
     allowNull: true, // Profile image URL (can be null initially)
   },
   portfolioImages: {
-    type: DataTypes.JSON, // Store an array of portfolio image URLs
+    type: DataTypes.TEXT, // Keep it as TEXT because LONGTEXT maps to TEXT in Sequelize
     allowNull: true,
+    get() {
+      // Convert the stored string back into a JSON object/array if it is valid JSON
+      const value = this.getDataValue('portfolioImages');
+      return value ? JSON.parse(value) : []; // Return an empty array if no data
+    },
+    set(value) {
+      // Convert the array or object to a JSON string before storing
+      this.setDataValue('portfolioImages', JSON.stringify(value));
+    },
   },
   certificates: {
-    type: DataTypes.JSON, // Store an array of certificates as JSON
+    type: DataTypes.TEXT, // Keep it as TEXT because LONGTEXT maps to TEXT in Sequelize
     allowNull: true,
+    get() {
+      // Convert the stored string back into a JSON object/array if it is valid JSON
+      const value = this.getDataValue('certificates');
+      return value ? JSON.parse(value) : []; // Return an empty array if no data
+    },
+    set(value) {
+      // Convert the array or object to a JSON string before storing
+      this.setDataValue('certificates', JSON.stringify(value));
+    },
   },
 }, {
   timestamps: true, // Automatically includes createdAt and updatedAt
