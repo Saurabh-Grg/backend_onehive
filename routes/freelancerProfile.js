@@ -18,9 +18,9 @@ router.post('/create', authenticateUser, upload, freelancerProfileController.cre
 // router.put('/:id', upload.single('profileImage'), freelancerProfileController.updateFreelancerProfile);
 router.put('/:id', upload, freelancerProfileController.updateFreelancerProfile);
 
-// // Route for fetching freelancer profile
-// router.get('/',  authenticateUser, freelancerProfileController.getFreelancerProfile);
-// Route for fetching freelancer profile with proposal check
+// Route for fetching freelancer profile
+router.get('/',  authenticateUser, freelancerProfileController.getFreelancerProfile);
+
 // Route for fetching freelancer profile with proposal check
 router.get('/freelancer-profile/:freelancer_id/:job_id', authenticateUser, async (req, res) => {
     const clientId = req.user.user_id; // Get the logged-in client ID from the token
