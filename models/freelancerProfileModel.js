@@ -72,4 +72,10 @@ const FreelancerProfile = sequelize.define('FreelancerProfile', {
   timestamps: true, // Automatically includes createdAt and updatedAt
 });
 
+// models/freelancerProfileModel.js
+FreelancerProfile.belongsTo(User, {
+  foreignKey: 'user_id',
+  as: 'user', // You can use 'user' to access the user data
+});
+
 module.exports = FreelancerProfile;

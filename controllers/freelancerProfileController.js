@@ -120,7 +120,7 @@
 //   getFreelancerProfile,
 // };
 
-
+// controllers/freelancerProfileController.js
 const freelancerProfileService = require('../services/freelancerProfileService');
 
 // Create freelancer profile

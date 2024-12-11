@@ -90,7 +90,9 @@
 //   getFreelancerProfile,
 // };
 
+// services/freelancerProfileService.js
 const FreelancerProfile = require('../models/freelancerProfileModel');
+const User = require('../models/userModel');
 
 // Create a new freelancer profile
 const createFreelancerProfile = async (profileData) => {
@@ -127,7 +129,7 @@ const getFreelancerProfile = async (userId) => {
         'certificates',
         'createdAt',
         'updatedAt'
-      ]
+      ],
     });
 
     if (!profile) {
@@ -145,12 +147,23 @@ const getFreelancerProfile = async (userId) => {
       parsedProfile.certificates = JSON.parse(parsedProfile.certificates);
     }
 
+    // Check if the User information is correctly included
+    if (parsedProfile.User) {
+      parsedProfile.city = parsedProfile.User.location; // Renaming for clarity
+      parsedProfile.userCreatedAt = parsedProfile.User.createdAt; // Renaming for clarity
+    } else {
+      res.status(500).json({ message: 'Server error', error: error.message });
+      console.error('User information not included in the profile response');
+    }
+
     return parsedProfile;
   } catch (error) {
     console.error('Error fetching freelancer profile:', error);
+    console.error('Error stack:', error.stack); // To get full stack trace
     throw new Error('Error fetching freelancer profile: ' + error.message);
   }
 };
+
 
 // Update the freelancer profile
 const updateFreelancerProfile = async (profileId, profileData) => {

@@ -1,17 +1,21 @@
 const express = require('express');
 const router = express.Router();
+
+const { Sequelize } = require('sequelize'); // Import Sequelize from the config
+const sequelize = require('../config/db'); // Import the sequelize instance from the db.js file
+
 const freelancerProfileController = require('../controllers/freelancerProfileController');
 const upload = require('../config/multer'); // Assuming multer is used for file uploads
 const authenticateUser = require('../middleware/auth');
 const FreelancerProfile = require('../models/freelancerProfileModel'); // Adjust path as needed
 const JobPosting = require('../models/jobPostingModel'); // Import JobPosting model
 const Proposal = require('../models/ProposalModel'); // Import Proposal model
+const User = require('../models/userModel');
 
 
 // const upload = multer({ dest: 'uploads/profile-images/' });
 
 // Route for creating freelancer profile
-// router.post('/create', authenticateUser, upload.single('profileImage'), freelancerProfileController.createFreelancerProfile);
 router.post('/create', authenticateUser, upload, freelancerProfileController.createFreelancerProfile);
 
 // Route for updating freelancer profile
@@ -57,8 +61,19 @@ router.get('/freelancer-profile/:freelancer_id/:job_id', authenticateUser, async
             });
         }
 
+        // Fetch the freelancer profile along with the city and createdAt from the User model
         const freelancerProfile = await FreelancerProfile.findOne({
             where: { user_id: freelancerId },
+            include: [
+                {
+                    model: User,
+                    as: 'user',
+                    attributes: [
+                        'city',
+                        'createdAt', // Format createdAt as 'YYYY-MM-DD'
+                    ],
+                },
+            ],
         });
 
         if (freelancerProfile) {
