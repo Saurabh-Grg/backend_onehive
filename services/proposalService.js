@@ -1,7 +1,7 @@
 // services/proposalService.js
 const Job = require('../models/jobPostingModel');
 const User = require('../models/userModel');
-const Proposal = require('../models/proposalModel');
+const Proposal = require('../models/ProposalModel');
 
 async function submitProposal(data) {
   const { job_id, freelancer_id, name, budget, use_escrow } = data;
@@ -50,8 +50,33 @@ async function fetchAllProposals() {
   });
   }
 
+  const fetchTotalProposalsForClient = async (clientId) => {
+    const { Op } = require('sequelize'); // Sequelize operators for advanced queries
+  
+    // Fetch jobs posted by the client
+    const jobs = await Job.findAll({
+      where: { user_id: clientId }, // Filter jobs by the client's ID
+      attributes: ['job_id'], // Only fetch job_id to minimize data load
+    });
+  
+    // Extract job IDs
+    const jobIds = jobs.map(job => job.job_id);
+  
+    // Count total proposals for those job IDs
+    const totalProposals = await Proposal.count({
+      where: {
+        job_id: {
+          [Op.in]: jobIds, // Match job IDs in the proposal table
+        },
+      },
+    });
+  
+    return totalProposals;
+  };
+
 module.exports = {
   submitProposal,
   fetchAllProposals,
-  fetchProposalsForClient, 
+  fetchProposalsForClient,
+  fetchTotalProposalsForClient 
 };

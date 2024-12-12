@@ -1,7 +1,7 @@
 // controllers/proposalController.js
 
 const proposalService = require('../services/proposalService');
-const Proposal = require('../models/proposalModel');
+const Proposal = require('../models/ProposalModel');
 
 const submitProposal = async (req, res) => {
     // Extract data from request body
@@ -55,9 +55,23 @@ const submitProposal = async (req, res) => {
     }
   };
   
+  const getTotalProposalsForClient = async (req, res) => {
+    const clientId = req.user.user_id; // Extract client ID from authenticated user context
+  
+    try {
+      // Fetch total proposals using the service
+      const totalProposals = await proposalService.fetchTotalProposalsForClient(clientId);
+  
+      return res.status(200).json({ totalProposals });
+    } catch (error) {
+      console.error('Error fetching total proposals for client:', error);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+  };
 
 module.exports = {
   submitProposal,
   getAllProposals,
-  getProposalsForClient
+  getProposalsForClient,
+  getTotalProposalsForClient
 };
