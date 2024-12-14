@@ -1,3 +1,4 @@
+//controllers/jobPostingController.js
 const jobPostingService = require('../services/jobPostingService');
 const jwt = require('jsonwebtoken');
 // const Job = require('../models/userModel');

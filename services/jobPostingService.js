@@ -1,3 +1,4 @@
+//services/jobPostingService.js
 const Job = require('../models/jobPostingModel');
 const BackendJob = require('../models/backendDevJobModel');
 const FrontendDevJob = require('../models/frontendDevJobModel');

@@ -1,3 +1,4 @@
+//routes/jobPosting.js
 const express = require('express');
 const router = express.Router();
 const authenticateUser = require('../middleware/auth'); // Import the auth middleware

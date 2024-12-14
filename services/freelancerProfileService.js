@@ -151,10 +151,11 @@ const getFreelancerProfile = async (userId) => {
     if (parsedProfile.User) {
       parsedProfile.city = parsedProfile.User.location; // Renaming for clarity
       parsedProfile.userCreatedAt = parsedProfile.User.createdAt; // Renaming for clarity
-    } else {
-      res.status(500).json({ message: 'Server error', error: error.message });
-      console.error('User information not included in the profile response');
     }
+    // } else {
+    //   res.status(500).json({ message: 'Server error', error: error.message });
+    //   console.error('User information not included in the profile response');
+    // }
 
     return parsedProfile;
   } catch (error) {
