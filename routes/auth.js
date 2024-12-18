@@ -16,13 +16,4 @@ router.post('/forgot-password', forgotPassword); // Forgot password route
 router.post('/verify-otp', verifyOtp);            // Step 2: Verify OTP
 router.post('/reset-password', resetPassword);   // Reset password route
 
-
-
-// // Request password reset route
-// router.post('/request-password-reset', requestPasswordReset);
-
-// // Reset password route
-// router.post('/reset-password', resetPassword);
-
-
 module.exports = router;
