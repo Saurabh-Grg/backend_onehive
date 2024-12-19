@@ -4,6 +4,9 @@ const Job = require('./jobPostingModel');
 const User = require('./userModel'); 
 const ClientProfile = require('./clientProfileModel'); 
 const LikedJob = require('./likedJobModel');
+const Message = require('./messageModel');
+const setupAssociations = require('./associations'); // Import setupAssociations function
+
 
 // Define associations
 User.hasMany(Job, {
@@ -30,4 +33,7 @@ ClientProfile.belongsTo(User, {
 LikedJob.belongsTo(Job, { foreignKey: 'job_id', as: 'jobDetails' });
 Job.hasMany(LikedJob, { foreignKey: 'job_id' });
 
-module.exports = { Job, User, ClientProfile, LikedJob,sequelize };
+// Set up associations for messages and users
+setupAssociations();
+
+module.exports = { Job, User, ClientProfile, LikedJob,Message, sequelize };

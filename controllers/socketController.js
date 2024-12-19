@@ -1,40 +1,81 @@
-let users = {};
+// controllers/socketController.js
+const jwt = require('jsonwebtoken');
+const Message = require('../models/messageModel'); // Import the Message model
 
-module.exports = (io) => {
-  io.on('connection', (socket) => {
-    console.log('A user connected:', socket.id);
+class SocketController {
+  constructor(io) {
+    this.io = io;
+    this.users = {}; // Store users and their socket IDs
+    this.initializeSocket();
+  }
 
-    socket.on('register', (userId) => {
-      users[userId] = socket.id;
-      console.log(`${userId} registered with socket ID: ${socket.id}`);
-    });
+  // controllers/socketController.js
 
-    socket.on('sendMessage', (messageData) => {
-      console.log('Received message:', messageData);
+initializeSocket() {
+  const socketUrl = `ws://${process.env.HOST || 'localhost'}:${process.env.PORT || 3000}`;
+  console.log(`Socket server is listening at ${socketUrl}`);
 
-      const receiverSocketId = users[messageData.receiverId];
+  // Middleware for authenticating socket connections
+  this.io.use((socket, next) => {
+    const token = socket.handshake.auth.token;
+    if (!token) {
+      console.error("Socket connection error: No token provided.");
+      return next(new Error("Authentication error: No token provided."));
+    }
 
-      if (receiverSocketId) {
-        io.to(receiverSocketId).emit('newMessage', {
-          senderId: messageData.senderId,
-          message: messageData.message,
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      socket.user = decoded; // Attach user info to the socket instance
+      console.log(`User authenticated: ${socket.user.user_id}`);
+      next();
+    } catch (err) {
+      console.error("Socket authentication error:", err.message);
+      next(new Error("Authentication error: Invalid token."));
+    }
+  });
+
+  // Handle connections
+  this.io.on('connection', (socket) => {
+    console.log(`User connected: ${socket.user.user_id}, socket ID: ${socket.id}`);
+    this.users[socket.user.user_id] = socket.id; // Register the user
+
+    // Log all connected users
+    console.log('Connected users:', this.users);
+
+    // Handle message sending
+    socket.on('sendMessage', async ({ to, message }) => {
+      try {
+        console.log(`Message received from ${socket.user.user_id}: ${message} to ${to}`);
+        console.log('Currently connected users:', this.users);
+
+        // Save the message to the database
+        const newMessage = await Message.create({
+          sender_id: socket.user.user_id,
+          receiver_id: to,
+          message,
         });
-        console.log('Message sent to', messageData.receiverId);
-      } else {
-        console.log('Receiver is not online');
+
+        // Emit the message to the recipient
+        if (this.users[to]) {
+          this.io.to(this.users[to]).emit('receiveMessage', newMessage);
+          console.log(`Message sent from ${socket.user.user_id} to ${to}: ${message}`);
+        } else {
+          console.error(`Receiver ${to} is not online`);
+        }
+      } catch (err) {
+        console.error("Error sending message:", err.message);
       }
     });
 
+    // Handle disconnection
     socket.on('disconnect', () => {
-      Object.keys(users).forEach((userId) => {
-        if (users[userId] === socket.id) {
-          delete users[userId];
-          console.log(`User ${userId} disconnected`);
-        }
-      });
+      console.log(`User disconnected: ${socket.user.user_id}, socket ID: ${socket.id}`);
+      delete this.users[socket.user.user_id]; // Clean up user on disconnect
     });
   });
+}
 
-  // Export the users object for other files to use
-  return users;
-};
+}
+
+// Export the controller as a function to initialize the socket
+module.exports = (io) => new SocketController(io);

@@ -1,6 +1,8 @@
 // models/userModel.js
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db'); // Importing the Sequelize instance
+const Message = require('./messageModel'); // Import the Message model
+
 
 
 const User = sequelize.define('User', {
