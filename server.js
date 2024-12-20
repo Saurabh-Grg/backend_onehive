@@ -54,6 +54,7 @@ const jobPostingRoutes = require('./routes/jobPosting'); // Import job posting r
 const upload  = require('./config/multer'); // Multer configuration imported here
 const proposalRoutes = require('./routes/proposal');  // Import proposal routes
 const likedJobsRoutes = require('./routes/likeJobRoutes');
+const followRoutes = require('./routes/followRoutes');
 const messagesRoutes = require('./routes/messaging');  // Import messages routes
 const SocketController = require('./controllers/socketController');
 
@@ -70,6 +71,8 @@ app.use('/api/freelancerProfile', freelancerProfileRoutes);
 app.use('/api/jobPosting', jobPostingRoutes); // Job posting endpoints
 app.use('/api/proposals', proposalRoutes); // Register proposal routes
 app.use('/api/liked-jobs', likedJobsRoutes);
+// Use follow routes
+app.use('/api/follow', followRoutes);
 // Register message routes
 app.use('/api/messages', messagesRoutes(io, {}));  // Pass the io and users object
 

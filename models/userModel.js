@@ -3,8 +3,6 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db'); // Importing the Sequelize instance
 const Message = require('./messageModel'); // Import the Message model
 
-
-
 const User = sequelize.define('User', {
   // Define the fields for the User model
   user_id: {
@@ -56,4 +54,4 @@ const User = sequelize.define('User', {
 });
 
 
-module.exports =  User ; // Export the User model
+module.exports =  User ; // Export the User models
