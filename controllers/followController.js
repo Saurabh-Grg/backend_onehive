@@ -1,6 +1,7 @@
 // controllers/followController.js
 const User = require('../models/userModel');
 const Follow = require('../models/followModel');
+const { createNotification } = require('../utils/notificationHelper');
 
 // Follow a freelancer
 const followFreelancer = async (followerId, followedId) => {
@@ -15,12 +16,22 @@ const followFreelancer = async (followerId, followedId) => {
 
     // Create a new follow relationship
     const follow = await Follow.create({ followerId, followedId });
+
+    // Fetch the follower's username
+    const follower = await User.findByPk(followerId, { attributes: ['username'] });
+
+    // Create a notification for the followed user
+    const message = `${follower.username} started following you.`;
+    await createNotification(followedId, message);
+
     return { message: 'You are now following this freelancer.', follow };
   } catch (error) {
     console.error('Error following freelancer:', error);
     throw error;
   }
 };
+
+//TODO: do isRead functionality
 
 // Unfollow a freelancer
 const unfollowFreelancer = async (followerId, followedId) => {

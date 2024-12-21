@@ -58,6 +58,8 @@ const followRoutes = require('./routes/followRoutes');
 const messagesRoutes = require('./routes/messaging');  // Import messages routes
 const SocketController = require('./controllers/socketController');
 
+const notificationsRoutes = require('./routes/notificationRoutes');
+
 // Initialize real-time messaging
 SocketController(io);
 
@@ -75,6 +77,8 @@ app.use('/api/liked-jobs', likedJobsRoutes);
 app.use('/api/follow', followRoutes);
 // Register message routes
 app.use('/api/messages', messagesRoutes(io, {}));  // Pass the io and users object
+
+app.use('/api/notifications', notificationsRoutes); 
 
 
 app.post('/uploads/profile-image', upload, (req, res) => {
