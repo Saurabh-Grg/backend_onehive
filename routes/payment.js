@@ -1,10 +1,9 @@
+// routes/payment.js
+const express = require('express');
+const { initiatePayment, verifyPayment } = require('../controllers/paymentController');
+const router = express.Router();
 
-// //routes/payment.js
-// const express = require("express");
-// const router = express.Router();
-// const { initiatePayment, verifyPayment } = require("../controllers/paymentController");
+router.post('/initialize', initiatePayment); // Start a new payment
+router.get('/verify', verifyPayment); // Verify payment status
 
-// router.post("/initialize", initiatePayment);
-// router.get("/verify", verifyPayment);
-
-// module.exports = router;
+module.exports = router;

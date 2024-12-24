@@ -63,8 +63,10 @@ const notificationsRoutes = require('./routes/notificationRoutes');
 // Initialize real-time messaging
 SocketController(io);
 
-// const paymentRoutes = require("./routes/payment");
-// app.use("/payment", paymentRoutes);
+const paymentRoutes = require('./routes/payment');
+
+app.use('/payment', paymentRoutes);
+
 
 // Use Routes
 app.use('/api/auth', authRoutes); // Authentication endpoints
@@ -109,6 +111,6 @@ app.use((err, req, res, next) => {
   res.status(500).send('Something broke!');
 });
 
-// app.get("/", function (req, res) {
-//   res.sendFile(__dirname + "/test.html");
-// });
+app.get("/", function (req, res) {
+  res.sendFile(__dirname + "/test.html");
+});
