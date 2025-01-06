@@ -31,7 +31,7 @@ const initiatePayment = async (req, res) => {
 
         res.json({
             success: true,
-            esewaRedirectUrl: `${process.env.ESEWA_GATEWAY_URL}/epay/main`,
+            esewaRedirectUrl: `${process.env.ESEWA_GATEWAY_URL}/api/epay/main`,
             params: paymentDetails,
         });
     } catch (error) {

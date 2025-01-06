@@ -40,7 +40,7 @@
 //       ]
 //     });
 
-//     // TODO: handle the parsing error , still in the String "portfolioImages and certificates"
+    // TODO: handle the parsing error , still in the String "portfolioImages and certificates"
 
 //     if (!profile) {
 //       throw new Error('Freelancer profile not found');
