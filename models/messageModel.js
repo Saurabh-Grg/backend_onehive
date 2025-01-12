@@ -1,36 +1,39 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
-const User = require('./userModel'); // Import the User model
+const User = require('./userModel');
 
 const Message = sequelize.define('Message', {
-  id: {
-    type: DataTypes.INTEGER,
+  message_id: {
+    type: DataTypes.BIGINT,
     autoIncrement: true,
     primaryKey: true,
   },
-  sender_id: {
+  senderId: {
     type: DataTypes.INTEGER,
     allowNull: false,
+    references: {
+      model: User,
+      key: 'user_id',
+    },
+    onDelete: 'CASCADE', // Ensures messages are deleted if the sender user is deleted
   },
-  receiver_id: {
+  receiverId: {
     type: DataTypes.INTEGER,
     allowNull: false,
+    references: {
+      model: User,
+      key: 'user_id',
+    },
+    onDelete: 'CASCADE', // Ensures messages are deleted if the receiver user is deleted
   },
   message: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
     allowNull: false,
   },
-  status: {
-    type: DataTypes.ENUM('sent', 'delivered', 'read'),
-    defaultValue: 'sent',
+  timestamp: {
+    type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW,
   },
-}, {
-  timestamps: true,
 });
-
-// Debugging: Log whenever a new message is created
-Message.beforeCreate((message, options) => {
-    console.log(`Creating new message from ${message.sender_id} to ${message.receiver_id}: ${message.message}`);
-  });
 
 module.exports = Message;

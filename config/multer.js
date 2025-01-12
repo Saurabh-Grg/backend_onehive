@@ -73,7 +73,7 @@ const upload = multer({
   { name: 'certificates', maxCount: 10 }, // Allow up to 5 certificate images
   { name: 'portfolioImages', maxCount: 10 }, // Allow up to 10 portfolio images
 ]);
-console.log("Multer configuration initialized");
+// console.log("Multer configuration initialized");
 
 module.exports = upload;
 

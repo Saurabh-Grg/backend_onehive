@@ -1,81 +1,38 @@
-// controllers/socketController.js
-const jwt = require('jsonwebtoken');
-const Message = require('../models/messageModel'); // Import the Message model
+// const socketService = require('../services/socketService');  // Import the socket service
 
-class SocketController {
-  constructor(io) {
-    this.io = io;
-    this.users = {}; // Store users and their socket IDs
-    this.initializeSocket();
-  }
+// module.exports = (io) => {
+//   io.on('connection', (socket) => {
+//     console.log(`User connected: ${socket.id}`);
 
-  // controllers/socketController.js
+//     // Emit connected feedback to the client
+//     socket.emit('connected', { message: 'Socket connected successfully' });
 
-initializeSocket() {
-  const socketUrl = `ws://${process.env.HOST || 'localhost'}:${process.env.PORT || 3000}`;
-  console.log(`Socket server is listening at ${socketUrl}`);
+//     // Handle send_message event
+//     socket.on('send_message', async (data) => {
+//       const { senderId, receiverId, message } = data;
+//       console.log(`Received send_message event: senderId: ${senderId}, receiverId: ${receiverId}, message: ${message}`);
+//       await socketService.sendMessage(senderId, receiverId, message, io);
+//     });
 
-  // Middleware for authenticating socket connections
-  this.io.use((socket, next) => {
-    const token = socket.handshake.auth.token;
-    if (!token) {
-      console.error("Socket connection error: No token provided.");
-      return next(new Error("Authentication error: No token provided."));
-    }
+//     // Handle join_room event
+//     socket.on('join_room', (roomId) => {
+//       console.log(`Received join_room event: roomId: ${roomId}`);
+//       socketService.joinRoom(socket, roomId);
+//     });
 
-    try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      socket.user = decoded; // Attach user info to the socket instance
-      console.log(`User authenticated: ${socket.user.user_id}`);
-      next();
-    } catch (err) {
-      console.error("Socket authentication error:", err.message);
-      next(new Error("Authentication error: Invalid token."));
-    }
-  });
+//     // Handle disconnection
+//     socket.on('disconnect', () => {
+//       console.log(`User disconnected: ${socket.id}`);
+//     });
 
-  // Handle connections
-  this.io.on('connection', (socket) => {
-    console.log(`User connected: ${socket.user.user_id}, socket ID: ${socket.id}`);
-    this.users[socket.user.user_id] = socket.id; // Register the user
+//     // Handle socket error
+//     socket.on('error', (error) => {
+//       console.error('Socket error:', error);
+//     });
 
-    // Log all connected users
-    console.log('Connected users:', this.users);
-
-    // Handle message sending
-    socket.on('sendMessage', async ({ to, message }) => {
-      try {
-        console.log(`Message received from ${socket.user.user_id}: ${message} to ${to}`);
-        console.log('Currently connected users:', this.users);
-
-        // Save the message to the database
-        const newMessage = await Message.create({
-          sender_id: socket.user.user_id,
-          receiver_id: to,
-          message,
-        });
-
-        // Emit the message to the recipient
-        if (this.users[to]) {
-          this.io.to(this.users[to]).emit('receiveMessage', newMessage);
-          console.log(`Message sent from ${socket.user.user_id} to ${to}: ${message}`);
-        } else {
-          console.error(`Receiver ${to} is not online`);
-        }
-      } catch (err) {
-        console.error("Error sending message:", err.message);
-      }
-    });
-
-    // Handle disconnection
-    socket.on('disconnect', () => {
-      console.log(`User disconnected: ${socket.user.user_id}, socket ID: ${socket.id}`);
-      delete this.users[socket.user.user_id]; // Clean up user on disconnect
-    });
-  });
-}
-
-}
-
-// Export the controller as a function to initialize the socket
-module.exports = (io) => new SocketController(io);
+//     // Debugging for WebSocket handshake issues
+//     socket.on('handshake_error', (error) => {
+//       console.error('Handshake error:', error);
+//     });
+//   });
+// };
