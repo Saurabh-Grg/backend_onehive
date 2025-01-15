@@ -7,18 +7,10 @@ const ClientProfile = require('../models/clientProfileModel');
 const upload = require('../config/multer'); // Import multer config
 
 // POST request to create client profile with image upload
-// router.post('/client-profile', authenticateUser, upload.single('profileImage'), clientProfileController.createClientProfile);
-
-router.post(
-    '/client-profile',
-    authenticateUser,
-    upload, // Use upload directly as it's already configured with .fields()
-    clientProfileController.createClientProfile
-  );
+router.post('/client-profile', authenticateUser, upload, clientProfileController.createClientProfile);
 
 // PUT request to update client profile with image upload
-// router.put('/client-profile/update/:id', authenticateUser, upload.single('profileImage'), clientProfileController.updateClientProfile);
-router.put('/client-profile/update/:id', authenticateUser, upload, clientProfileController.updateClientProfile);
+// router.put('/client-profile/update/:id', authenticateUser, upload, clientProfileController.updateClientProfile);
 
 
 // GET request to fetch client profile
@@ -40,7 +32,6 @@ router.get('/check-profile/:user_id', async (req, res) => {
 });
 
 // PUT request to update client profile with image upload
-// router.put('/client-profile/update/:id', authenticateUser, upload.single('profileImage'), clientProfileController.updateClientProfile);
 router.put('/client-profile/update/:id', authenticateUser, upload, clientProfileController.updateClientProfile);
 
 

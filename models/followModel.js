@@ -32,5 +32,9 @@ const Follow = sequelize.define('Follow', {
   timestamps: true, // Automatically includes createdAt and updatedAt fields
 });
 
+Follow.belongsTo(User, { as: 'followedUser', foreignKey: 'followedId' });
+Follow.belongsTo(User, { as: 'followerUser', foreignKey: 'followerId' });
+
+
 // Export the Follow model
 module.exports = Follow;

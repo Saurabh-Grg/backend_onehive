@@ -122,6 +122,8 @@
 
 // controllers/freelancerProfileController.js
 const freelancerProfileService = require('../services/freelancerProfileService');
+const FreelancerProfile = require('../models/freelancerProfileModel'); // Adjust path as needed
+const User = require('../models/userModel');
 
 // Create freelancer profile
 const createFreelancerProfile = async (req, res) => {
@@ -171,6 +173,63 @@ const createFreelancerProfile = async (req, res) => {
     });
   }
 };
+
+// TODO: display the freelancers data in freelancers screen, done in backend , frontend incomplete , this will be used
+const getFreelancerOwnProfile = async (req, res) => {
+  try {
+    const user = req.user;
+
+    // Ensure user is authenticated
+    if (!user || !user.user_id) {
+      return res.status(401).json({ message: 'Unauthorized: No user logged in.' });
+    }
+
+    // Fetch the freelancer profile along with the city and createdAt from the User model
+    const freelancerProfile = await FreelancerProfile.findOne({
+      where: { user_id: user.user_id },
+      include: [
+        {
+          model: User,
+          as: 'user', // Ensure this alias matches the association in your Sequelize models
+          attributes: ['city', 'createdAt'],
+        },
+      ],
+    });
+
+    // Ensure freelancer profile is found
+    if (!freelancerProfile) {
+      return res.status(404).json({ message: 'Freelancer profile not found.' });
+    }
+
+    // Combine freelancer profile and user details
+    const profileData = {
+      id: freelancerProfile.id,
+      userId: freelancerProfile.user_id,
+      name: freelancerProfile.name,
+      bio: freelancerProfile.bio,
+      skills: freelancerProfile.skills,
+      experience: freelancerProfile.experience,
+      education: freelancerProfile.education,
+      profileImageUrl: freelancerProfile.profileImageUrl,
+      portfolioImages: freelancerProfile.portfolioImages,
+      certificates: freelancerProfile.certificates,
+      city: freelancerProfile.user.city, // Access city from the included user data
+      createdAt: freelancerProfile.user.createdAt, // Access createdAt from the included user data
+    };
+
+    // Return profile data
+    res.status(200).json({
+      message: 'Freelancer profile fetched successfully',
+      data: profileData,
+    });
+  } catch (error) {
+    console.error('Error fetching freelancer own profile:', error.message);
+    res.status(500).json({
+      message: 'Error fetching freelancer own profile: ' + error.message,
+    });
+  }
+};
+
 
 // Update freelancer profile
 const updateFreelancerProfile = async (req, res) => {
@@ -239,4 +298,5 @@ module.exports = {
   createFreelancerProfile,
   updateFreelancerProfile,
   getFreelancerProfile,
+  getFreelancerOwnProfile, 
 };

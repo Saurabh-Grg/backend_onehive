@@ -45,9 +45,9 @@ const Job = require('./jobPostingModel');
 const User = require('./userModel');
 const ClientProfile = require('./clientProfileModel');
 const LikedJob = require('./likedJobModel');
-const Message = require('./messageModel');
-const setupAssociations = require('./associations'); // Import setupAssociations function
-
+const Message = require('./Message');
+const FreelancerProfile = require('./freelancerProfileModel');
+   
 // Define associations
 User.hasMany(Job, {
   foreignKey: 'user_id',
@@ -69,13 +69,19 @@ ClientProfile.belongsTo(User, {
   as: 'user',
 });
 
+User.hasOne(FreelancerProfile, {
+  foreignKey: 'user_id',
+  as: 'freelancerProfile', // Alias for the relationship
+});
+
+FreelancerProfile.belongsTo(User, {
+  foreignKey: 'user_id',
+  as: 'freelancerUser', // Alias for the relationship
+});
+
 // Associations for liked jobs
 LikedJob.belongsTo(Job, { foreignKey: 'job_id', as: 'jobDetails' });
 Job.hasMany(LikedJob, { foreignKey: 'job_id' });
-
-// Set up associations for messages and users
-// Message associations should be handled in `setupAssociations`
-setupAssociations();
 
 // Sync models with the database
 // (async () => {

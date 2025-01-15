@@ -114,7 +114,6 @@
 // });
 
 
-
 const http = require('http');
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -122,7 +121,6 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
 const session = require('express-session');
-const { swaggerDocs, swaggerUi } = require("./config/swagger");
 const socketIo = require('socket.io');
 
 // Load environment variables
@@ -133,37 +131,8 @@ const app = express();
 
 // Create the HTTP server
 const server = http.createServer(app);
-
-// Initialize Socket.IO and pass the server to it
-const io = socketIo(server, {
-  cors: {
-    origin: '*',  // Allow connections from any origin
-    methods: ['GET', 'POST'],
-    credentials: true,
-  },
-  transports: ['websocket'],  // Force WebSocket transport
-});
-
-
-// Handle socket connections
-io.on('connection', (socket) => {
-  console.log(`User connected: ${socket.id}`);
-
-  // Send a confirmation message to the client
-  socket.emit('connected', { message: 'Socket connected successfully' });
-
-  // Example: Listen for send_message event
-  socket.on('send_message', (data) => {
-    console.log('Message received:', data);
-    // Handle message (you can broadcast, save to DB, etc.)
-    io.emit('receive_message', data);  // Broadcasting message to all clients
-  });
-
-  // Handle disconnection
-  socket.on('disconnect', () => {
-    console.log(`User disconnected: ${socket.id}`);
-  });
-});
+const io = socketIo(server);           // Initialize Socket.io with the server
+// const port = process.env.PORT || 8080;
 
 // Middleware
 app.use(cors({
@@ -194,9 +163,10 @@ const jobPostingRoutes = require('./routes/jobPosting');
 const proposalRoutes = require('./routes/proposal');
 const likedJobsRoutes = require('./routes/likeJobRoutes');
 const followRoutes = require('./routes/followRoutes');
-const messagingRoutes = require('./routes/messaging');
 const notificationsRoutes = require('./routes/notificationRoutes');
 const paymentRoutes = require('./routes/payment');
+const messageRoutes = require('./routes/messageRoutes');
+const Message = require('./models/Message'); 
 
 // Use Routes
 app.use('/payment', paymentRoutes);
@@ -207,10 +177,11 @@ app.use('/api/jobPosting', jobPostingRoutes);
 app.use('/api/proposals', proposalRoutes);
 app.use('/api/liked-jobs', likedJobsRoutes);
 app.use('/api/follow', followRoutes);
-app.use('/api/messages', messagingRoutes);
 app.use('/api/notifications', notificationsRoutes);
+app.use('/api/messages', messageRoutes);
 
 // Swagger Documentation
+const { swaggerDocs, swaggerUi } = require("./config/swagger");
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // Handle file uploads
@@ -222,10 +193,57 @@ app.post('/uploads/profile-image', upload, (req, res) => {
   return res.json({ message: 'No image uploaded', profileImageUrl: null });
 });
 
-// Static files
-app.use(express.static(path.resolve("./public")));
-app.get("/", (req, res) => {
-  return res.sendFile("/public/index.html");
+// Socket.io connection event
+io.on('connection', (socket) => {
+  console.log('A user connected');
+
+  // Server-side: socket.io event to handle message sending
+socket.on('send_message', async (data) => {
+    const { senderId, receiverId, message } = data;
+    console.log('Message received from sender:', senderId, 'to receiver:', receiverId, 'Message:', message);
+  
+    try {
+      // Save the message to the database
+      const savedMessage = await Message.create({
+        senderId: senderId,
+        receiverId: receiverId,
+        message: message,
+        messageType: 'text', // You can modify this if it's a media message
+      });
+  
+      // Emit the message to the receiver only
+      socket.to(receiverId).emit('receive_message', {
+        senderId,
+        message: savedMessage.message, // Use the message from the database
+      });
+  
+      // Emit back to the sender (optional, for confirmation)
+      socket.emit('message_sent', { senderId, message: savedMessage.message });
+  
+    } catch (error) {
+      console.error('Error saving message:', error);
+    }
+  });
+
+  // Join room for the user based on their userId
+  socket.on('join', (userId) => {
+    console.log(`User ${userId} joined`);
+    socket.join(userId); // Join a room with userId as the room name
+  });
+
+  // Handle media messages (image, audio, video)
+  socket.on('send_media', (data) => {
+    const { senderId, receiverId, fileUrl } = data;
+    console.log('Media received from sender:', senderId, 'to receiver:', receiverId, 'File URL:', fileUrl);
+
+    // Emit the media to the specific receiver only
+    socket.to(receiverId).emit('receive_media', { senderId, fileUrl });
+  });
+
+  // Handle disconnect event
+  socket.on('disconnect', () => {
+    console.log('User disconnected');
+  });
 });
 
 // Start the server

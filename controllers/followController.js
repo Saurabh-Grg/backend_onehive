@@ -2,6 +2,8 @@
 const User = require('../models/userModel');
 const Follow = require('../models/followModel');
 const { createNotification } = require('../utils/notificationHelper');
+const FreelancerProfile = require('../models/freelancerProfileModel'); // Adjust path as needed
+const ClientProfile = require('../models/clientProfileModel');
 
 // Follow a freelancer
 const followFreelancer = async (followerId, followedId) => {
@@ -11,7 +13,7 @@ const followFreelancer = async (followerId, followedId) => {
       where: { followerId, followedId }
     });
     if (existingFollow) {
-      return { message: 'You are already following this freelancer.' };
+      return { message: 'You are already following this user.' };
     }
 
     // Create a new follow relationship
@@ -24,7 +26,7 @@ const followFreelancer = async (followerId, followedId) => {
     const message = `${follower.username} started following you.`;
     await createNotification(followedId, message);
 
-    return { message: 'You are now following this freelancer.', follow };
+    return { message: 'You are now following this user.', follow };
   } catch (error) {
     console.error('Error following freelancer:', error);
     throw error;
@@ -66,6 +68,96 @@ const getFollowStatus = async (followerId, followedId) => {
       throw error;
     }
   };
-  
 
-module.exports = { followFreelancer, unfollowFreelancer , getFollowStatus };
+
+  const getFollowLists = async (userId) => {
+    try {
+      // Fetch users the logged-in user is following
+      const following = await Follow.findAll({
+        where: { followerId: userId },
+        include: [
+          {
+            model: User,
+            as: 'followedUser',
+            attributes: ['user_id', 'username', 'email', 'city', 'role'], // Fetch user details
+            include: [
+              {
+                model: FreelancerProfile,
+                as: 'freelancerProfile', // Include freelancer profile
+                attributes: ['profileImageUrl'], // Fetch profile image
+              },
+              {
+                model: ClientProfile,
+                as: 'clientProfile', // Include client profile
+                attributes: ['profileImageUrl'], // Fetch profile image
+              },
+            ],
+          },
+        ],
+      });
+  
+      // Fetch users who are following the logged-in user
+      const followers = await Follow.findAll({
+        where: { followedId: userId },
+        include: [
+          {
+            model: User,
+            as: 'followerUser',
+            attributes: ['user_id', 'username', 'email', 'city', 'role'], // Fetch user details
+            include: [
+              {
+                model: FreelancerProfile,
+                as: 'freelancerProfile', // Include freelancer profile
+                attributes: ['profileImageUrl'], // Fetch profile image
+              },
+              {
+                model: ClientProfile,
+                as: 'clientProfile', // Include client profile
+                attributes: ['profileImageUrl'], // Fetch profile image
+              },
+            ],
+          },
+        ],
+      });
+  
+      // Transform the data for the response
+      const followingList = following.map(f => {
+        const user = f.followedUser.dataValues;
+        return {
+          user_id: user.user_id,
+          username: user.username,
+          email: user.email,
+          city: user.city,
+          role: user.role,
+          profileImageUrl: user.role === 'freelancer'
+            ? user.freelancerProfile?.profileImageUrl || null
+            : user.clientProfile?.profileImageUrl || null,
+        };
+      });
+      
+      const followerList = followers.map(f => {
+        const user = f.followerUser.dataValues;
+        return {
+          user_id: user.user_id,
+          username: user.username,
+          email: user.email,
+          city: user.city,
+          role: user.role,
+          profileImageUrl: user.role === 'freelancer'
+            ? user.freelancerProfile?.profileImageUrl || null
+            : user.clientProfile?.profileImageUrl || null,
+        };
+      });
+  
+      return {
+        following: followingList,
+        followers: followerList,
+      };
+    } catch (error) {
+      console.error('Error fetching follow lists:', error);
+      throw new Error('Unable to fetch follow lists.');
+    }
+  };
+  
+  module.exports = { followFreelancer, unfollowFreelancer, getFollowStatus, getFollowLists };
+  

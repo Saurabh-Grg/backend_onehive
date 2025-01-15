@@ -12,18 +12,15 @@ const JobPosting = require('../models/jobPostingModel'); // Import JobPosting mo
 const Proposal = require('../models/ProposalModel'); // Import Proposal model
 const User = require('../models/userModel');
 
-
-// const upload = multer({ dest: 'uploads/profile-images/' });
-
 // Route for creating freelancer profile
 router.post('/create', authenticateUser, upload, freelancerProfileController.createFreelancerProfile);
 
 // Route for updating freelancer profile
 // router.put('/:id', upload.single('profileImage'), freelancerProfileController.updateFreelancerProfile);
-router.put('/:id', upload, freelancerProfileController.updateFreelancerProfile);
+router.put('/:id',authenticateUser, upload, freelancerProfileController.updateFreelancerProfile);
 
-// Route for fetching freelancer profile
-router.get('/',  authenticateUser, freelancerProfileController.getFreelancerProfile);
+// Route for freelancers to fetch their own profile
+router.get('/my-profile', authenticateUser, freelancerProfileController.getFreelancerOwnProfile);
 
 // Route for fetching freelancer profile with proposal check
 router.get('/freelancer-profile/:freelancer_id/:job_id', authenticateUser, async (req, res) => {
