@@ -2,6 +2,8 @@
 const registerUserService = require('../services/register');
 // const passwordResetService = require('../services/passwordReset');
 const nodemailer = require('nodemailer');
+const FreelancerProfile = require('../models/freelancerProfileModel');
+const ClientProfile = require('../models/clientProfileModel');
 
 const db = require('../config/db');
 const User = require('../models/userModel');
@@ -31,7 +33,6 @@ const registerUser = async (req, res) => {
   }
 };
 
-// Controller for user login
 const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
@@ -55,16 +56,29 @@ const loginUser = async (req, res) => {
       return res.status(401).json({ status: 'error', message: 'Invalid password' });
     }
 
-    // If login is successful, generate a JWT token
+    // Initialize profile image variable
+    let profileImage = null;
+
+    // Check role and fetch the corresponding profile image
+    if (user.role === 'freelancer') {
+      // If the user is a freelancer, get the profile image from the FreelancerProfile table
+      const freelancerProfile = await FreelancerProfile.findOne({ where: { user_id: user.user_id } });
+      profileImage = freelancerProfile ? freelancerProfile.profileImageUrl : null;
+    } else if (user.role === 'client') {
+      // If the user is a client, get the profile image from the ClientProfile table
+      const clientProfile = await ClientProfile.findOne({ where: { user_id: user.user_id } });
+      profileImage = clientProfile ? clientProfile.profileImageUrl : null;
+    }
+
+    // Generate JWT token for the user
     const token = jwt.sign({ user_id: user.user_id, role: user.role }, process.env.JWT_SECRET, {
       expiresIn: '30d', // Set your expiration time
     });
 
+    // Log the role for debugging purposes
+    console.log('User Role:', user.role);
 
-    // Log the role being sent back
-    console.log('User Role:', user.role); // Add this line
-
-    // Return the user details and JWT token
+    // Return the user details and JWT token along with profile image
     res.status(200).json({
       status: 'success',
       user: {
@@ -72,6 +86,7 @@ const loginUser = async (req, res) => {
         role: user.role,   // User's role (freelancer or client)
         username: user.username,
         user_id: user.user_id,
+        profile_image: profileImage, // Profile image based on the user's role
       },
       token: token, // JWT token
     });
@@ -80,6 +95,8 @@ const loginUser = async (req, res) => {
     res.status(500).json({ status: 'error', message: 'Server error' });
   }
 };
+
+
 
 // Step 1: Generate OTP and send to email
 const forgotPassword = async (req, res) => {

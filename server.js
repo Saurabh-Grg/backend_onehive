@@ -122,6 +122,11 @@ const dotenv = require('dotenv');
 const path = require('path');
 const session = require('express-session');
 const socketIo = require('socket.io');
+const { Op } = require('sequelize');
+
+const sequelize = require('./config/db');
+const Message = require('./models/Message'); 
+
 
 // Load environment variables
 dotenv.config();
@@ -165,8 +170,8 @@ const likedJobsRoutes = require('./routes/likeJobRoutes');
 const followRoutes = require('./routes/followRoutes');
 const notificationsRoutes = require('./routes/notificationRoutes');
 const paymentRoutes = require('./routes/payment');
-const messageRoutes = require('./routes/messageRoutes');
-const Message = require('./models/Message'); 
+// const messageRoutes = require('./routes/messageRoutes');
+
 
 // Use Routes
 app.use('/payment', paymentRoutes);
@@ -178,7 +183,7 @@ app.use('/api/proposals', proposalRoutes);
 app.use('/api/liked-jobs', likedJobsRoutes);
 app.use('/api/follow', followRoutes);
 app.use('/api/notifications', notificationsRoutes);
-app.use('/api/messages', messageRoutes);
+// app.use('/api/messages', messageRoutes);
 
 // Swagger Documentation
 const { swaggerDocs, swaggerUi } = require("./config/swagger");
@@ -226,9 +231,20 @@ socket.on('send_message', async (data) => {
   });
 
   // Join room for the user based on their userId
-  socket.on('join', (userId) => {
+  socket.on('join', async (userId) => {
     console.log(`User ${userId} joined`);
     socket.join(userId); // Join a room with userId as the room name
+    // Fetch message history from the database
+    const messages = await Message.findAll({
+      where: {
+        [Op.or]: [
+          { senderId: userId },
+          { receiverId: userId }
+        ]
+      }
+    });
+  // Emit message history to the user
+  socket.emit('message_history', messages);
   });
 
   // Handle media messages (image, audio, video)
