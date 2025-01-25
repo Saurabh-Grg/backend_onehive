@@ -1,38 +1,92 @@
-// const socketService = require('../services/socketService');  // Import the socket service
+const { Op } = require("sequelize");
+const Message = require("../models/Message");
 
-// module.exports = (io) => {
-//   io.on('connection', (socket) => {
-//     console.log(`User connected: ${socket.id}`);
+function initializeSocket(io) {
+  io.on("connection", (socket) => {
+    console.log("A user connected");
 
-//     // Emit connected feedback to the client
-//     socket.emit('connected', { message: 'Socket connected successfully' });
+    // Handle message sending
+    socket.on("send_message", async (data) => {
+      const { senderId, receiverId, message } = data;
+      console.log(
+        "Message received from sender:",
+        senderId,
+        "to receiver:",
+        receiverId,
+        "Message:",
+        message
+      );
 
-//     // Handle send_message event
-//     socket.on('send_message', async (data) => {
-//       const { senderId, receiverId, message } = data;
-//       console.log(`Received send_message event: senderId: ${senderId}, receiverId: ${receiverId}, message: ${message}`);
-//       await socketService.sendMessage(senderId, receiverId, message, io);
-//     });
+      try {
+        // Save the message to the database
+        const savedMessage = await Message.create({
+          senderId: senderId,
+          receiverId: receiverId,
+          message: message,
+          messageType: "text", // Modify if it's a media message
+        });
 
-//     // Handle join_room event
-//     socket.on('join_room', (roomId) => {
-//       console.log(`Received join_room event: roomId: ${roomId}`);
-//       socketService.joinRoom(socket, roomId);
-//     });
+        // Emit the message to the receiver
+        socket.to(receiverId).emit("receive_message", {
+          senderId,
+          message: savedMessage.message,
+        });
 
-//     // Handle disconnection
-//     socket.on('disconnect', () => {
-//       console.log(`User disconnected: ${socket.id}`);
-//     });
+        // Confirm message sent to the sender
+        socket.emit("message_sent", { senderId, message: savedMessage.message });
+      } catch (error) {
+        console.error("Error saving message:", error);
+      }
+    });
 
-//     // Handle socket error
-//     socket.on('error', (error) => {
-//       console.error('Socket error:', error);
-//     });
+    // Handle typing events
+    socket.on("typing", (data) => {
+      const { senderId, receiverId } = data;
+      console.log(`User ${senderId} is typing to ${receiverId}`);
+      socket.to(receiverId).emit("typing", { senderId, isTyping: true });
+    });
 
-//     // Debugging for WebSocket handshake issues
-//     socket.on('handshake_error', (error) => {
-//       console.error('Handshake error:', error);
-//     });
-//   });
-// };
+    socket.on("stop_typing", (data) => {
+      const { senderId, receiverId } = data;
+      console.log(`User ${senderId} stopped typing to ${receiverId}`);
+      socket.to(receiverId).emit("typing", { senderId, isTyping: false });
+    });
+
+    // Join room based on userId
+    socket.on("join", async (userId) => {
+      console.log(`User ${userId} joined`);
+      socket.join(userId);
+
+      // Fetch message history
+      const messages = await Message.findAll({
+        where: {
+          [Op.or]: [{ senderId: userId }, { receiverId: userId }],
+        },
+      });
+
+      // Emit message history
+      socket.emit("message_history", messages);
+    });
+
+    // Handle media messages
+    socket.on("send_media", (data) => {
+      const { senderId, receiverId, fileUrl } = data;
+      console.log(
+        "Media received from sender:",
+        senderId,
+        "to receiver:",
+        receiverId,
+        "File URL:",
+        fileUrl
+      );
+      socket.to(receiverId).emit("receive_media", { senderId, fileUrl });
+    });
+
+    // Handle disconnection
+    socket.on("disconnect", () => {
+      console.log("User disconnected");
+    });
+  });
+}
+
+module.exports = initializeSocket;
