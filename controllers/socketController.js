@@ -54,19 +54,20 @@ function initializeSocket(io) {
 
     // Join room based on userId
     socket.on("join", async (userId) => {
-      console.log(`User ${userId} joined`);
-      socket.join(userId);
-
-      // Fetch message history
-      const messages = await Message.findAll({
-        where: {
-          [Op.or]: [{ senderId: userId }, { receiverId: userId }],
-        },
+        console.log(`User ${userId} joined`);
+        socket.join(userId);
+  
+        // Fetch message history
+        const messages = await Message.findAll({
+          where: {
+            [Op.or]: [{ senderId: userId }, { receiverId: userId }],
+          },
+        });
+  
+        // Emit message history
+        socket.emit("message_history", messages);
       });
-
-      // Emit message history
-      socket.emit("message_history", messages);
-    });
+  
 
     // Handle media messages
     socket.on("send_media", (data) => {
@@ -84,8 +85,15 @@ function initializeSocket(io) {
 
     // Handle disconnection
     socket.on("disconnect", () => {
-      console.log("User disconnected");
-    });
+        console.log(`User disconnected: ${socket.id}`);
+        const rooms = Array.from(socket.rooms);
+        rooms.forEach((room) => {
+          if (room !== socket.id) {
+            socket.leave(room);
+            console.log(`User left room: ${room}`);
+          }
+        });
+      });      
   });
 }
 
