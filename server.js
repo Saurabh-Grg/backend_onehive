@@ -259,7 +259,7 @@ const { swaggerDocs, swaggerUi } = require("./config/swagger");
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // Handle file uploads
-const upload = require("./config/multer");
+const { upload } = require("./config/multer");
 app.post("/uploads/profile-image", upload, (req, res) => {
   if (req.file) {
     return res.json({

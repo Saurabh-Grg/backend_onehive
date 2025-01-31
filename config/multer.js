@@ -37,6 +37,19 @@ const storage = multer.diskStorage({
   }
 });
 
+// Storage configuration for chat file uploads
+const chatStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const folder = 'uploads/chat-files';
+    createDirIfNotExists(path.join(__dirname, '..', folder));
+    cb(null, folder);
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  }
+});
+
+
 // File filter for allowed file types (images only)
 const fileFilter = (req, file, cb) => {
   // Allowed file extensions and MIME types
@@ -59,8 +72,25 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
+// File filter for chat file uploads (Supports images, videos, audio, and documents)
+const chatFileFilter = (req, file, cb) => {
+  const allowedMimeTypes = [
+    'image/jpeg', 'image/jpg', 'image/png',
+    'video/mp4', 'audio/mpeg', 'audio/mp3',
+    'application/pdf', 'application/msword'
+  ];
+
+  if (allowedMimeTypes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error('Invalid file type. Only images, videos, audio, and documents are allowed.'));
+  }
+};
+
 // Define limits for file uploads
 const limits = { fileSize: 5 * 1024 * 1024 }; // 5MB size limit per file
+
+const chatLimits = { fileSize: 10 * 1024 * 1024 }; // 10MB for chat files
 
 
 // Combine the multer configuration with field-specific limits
@@ -75,7 +105,14 @@ const upload = multer({
 ]);
 // console.log("Multer configuration initialized");
 
-module.exports = upload;
+const chatUpload = multer({
+  storage: chatStorage,
+  limits: chatLimits,
+  fileFilter: chatFileFilter
+}).single('chatFile'); // Accept a single chat file
+
+
+module.exports = { upload, chatUpload };
 
 
 

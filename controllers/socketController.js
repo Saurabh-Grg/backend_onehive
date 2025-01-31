@@ -53,35 +53,65 @@ function initializeSocket(io) {
     });
 
     // Join room based on userId
-    socket.on("join", async (userId) => {
-        console.log(`User ${userId} joined`);
-        socket.join(userId);
+    socket.on("join_chat", async (data) => {
+      const { senderId, receiverId } = data;
+      console.log(`User ${senderId} joined chat with ${receiverId}`);
   
-        // Fetch message history
-        const messages = await Message.findAll({
-          where: {
-            [Op.or]: [{ senderId: userId }, { receiverId: userId }],
-          },
-        });
+      socket.join(`${senderId}-${receiverId}`);
+      socket.join(`${receiverId}-${senderId}`); // Ensure both users are in the same chat room
   
-        // Emit message history
-        socket.emit("message_history", messages);
-      });
+      try {
+          const messages = await Message.findAll({
+              where: {
+                  [Op.or]: [
+                      { senderId: senderId, receiverId: receiverId },
+                      { senderId: receiverId, receiverId: senderId },
+                  ],
+              },
+              order: [["createdAt", "ASC"]], // Sort messages in order
+          });
+  
+          // Emit only relevant messages
+          socket.emit("message_history", messages);
+      } catch (error) {
+          console.error("Error retrieving message history:", error);
+          socket.emit("error", { message: "Failed to load messages." });
+      }
+  });
+  
   
 
     // Handle media messages
-    socket.on("send_media", (data) => {
-      const { senderId, receiverId, fileUrl } = data;
-      console.log(
-        "Media received from sender:",
-        senderId,
-        "to receiver:",
-        receiverId,
-        "File URL:",
-        fileUrl
-      );
-      socket.to(receiverId).emit("receive_media", { senderId, fileUrl });
+    socket.on("send_media", async (data) => {
+      const { senderId, receiverId, fileUrl, messageType } = data;
+      
+      console.log(`Media received from sender: ${senderId} to receiver: ${receiverId}, File: ${fileUrl}`);
+    
+      try {
+        // Save media message in database
+        const savedMessage = await Message.create({
+          senderId,
+          receiverId,
+          fileUrl,
+          messageType, // 'image', 'video', 'audio', 'document'
+          message: ''  // Empty since it's a media file
+        });
+    
+        // Emit media message to receiver
+        io.to(`${senderId}-${receiverId}`).emit("receive_media", {
+          senderId,
+          receiverId,
+          fileUrl,
+          messageType
+        });
+    
+        // Confirm message sent to sender
+        socket.emit("media_sent", { senderId, fileUrl, messageType });
+      } catch (error) {
+        console.error("Error saving media message:", error);
+      }
     });
+    
 
     // Handle disconnection
     socket.on("disconnect", () => {

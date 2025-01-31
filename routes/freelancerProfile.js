@@ -5,7 +5,7 @@ const { Sequelize } = require('sequelize'); // Import Sequelize from the config
 const sequelize = require('../config/db'); // Import the sequelize instance from the db.js file
 
 const freelancerProfileController = require('../controllers/freelancerProfileController');
-const upload = require('../config/multer'); // Assuming multer is used for file uploads
+const { upload } = require('../config/multer'); // Assuming multer is used for file uploads
 const authenticateUser = require('../middleware/auth');
 const FreelancerProfile = require('../models/freelancerProfileModel'); // Adjust path as needed
 const JobPosting = require('../models/jobPostingModel'); // Import JobPosting model

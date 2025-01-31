@@ -4,7 +4,7 @@ const router = express.Router();
 const clientProfileController = require('../controllers/clientProfileController');
 const authenticateUser = require('../middleware/auth'); // Import the auth middleware
 const ClientProfile = require('../models/clientProfileModel');
-const upload = require('../config/multer'); // Import multer config
+const { upload } = require('../config/multer'); // Import multer config
 
 // POST request to create client profile with image upload
 router.post('/client-profile', authenticateUser, upload, clientProfileController.createClientProfile);
