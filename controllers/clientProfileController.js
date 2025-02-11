@@ -102,11 +102,11 @@ const getClientProfile = async (req, res) => {
       console.warn("No profile image URL found in fetched profile.");
     }
 
-    // Log the final response before sending it
-    console.log("Response being sent:", {
-      message: 'Client profile fetched successfully',
-      data: profile
-    });
+    // // Log the final response before sending it
+    // console.log("Response being sent:", {
+    //   message: 'Client profile fetched successfully',
+    //   data: profile
+    // });
 
     res.status(200).json({
       message: 'Client profile fetched successfully',
