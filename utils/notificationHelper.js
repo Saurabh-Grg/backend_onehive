@@ -10,4 +10,8 @@ const createNotification = async (userId, message) => {
   }
 };
 
+
 module.exports = { createNotification };
+
+
+// interview question: notification through firebase??
