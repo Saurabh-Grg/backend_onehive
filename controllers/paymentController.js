@@ -66,3 +66,6 @@ const verifyPayment = async (req, res) => {
 };
 
 module.exports = { initiatePayment, verifyPayment };
+
+
+// this page needs to be refactored to use the new payment model
