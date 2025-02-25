@@ -1,7 +1,7 @@
 // services/proposalService.js
 const Job = require('../models/jobPostingModel');
 const User = require('../models/userModel');
-const Proposal = require('../models/ProposalModel');
+const Proposal = require('../models/proposalModel');
 
 async function submitProposal(data) {
   const { job_id, freelancer_id, name, budget, use_escrow } = data;
@@ -74,9 +74,46 @@ async function fetchAllProposals() {
     return totalProposals;
   };
 
+
+
+// Function to fetch a proposal by its ID
+async function fetchProposalById(proposalId) {
+  return await Proposal.findByPk(proposalId);
+}
+
+  async function acceptProposalService(proposal_id, clientId) {
+    // Find the proposal
+    const proposal = await Proposal.findByPk(proposal_id);
+    if (!proposal) {
+        return { error: "Proposal not found." };
+    }
+
+    // Fetch the job related to the proposal
+    const job = await Job.findByPk(proposal.job_id);
+
+    if (!job) {
+        return { error: "Job not found." };
+    }
+
+    // Check if the authenticated client is the owner of the job
+    if (job.user_id !== clientId) {
+        return { error: "You are not authorized to accept this proposal." };
+    }
+
+    // Update job status to "ongoing"
+    await Job.update({ status: "ongoing" }, { where: { job_id: job.job_id } });
+
+    // Delete the accepted proposal
+    await Proposal.destroy({ where: { proposal_id: proposal_id } });
+
+    return { success: true };
+}
+
 module.exports = {
   submitProposal,
   fetchAllProposals,
   fetchProposalsForClient,
-  fetchTotalProposalsForClient 
+  fetchTotalProposalsForClient ,
+  acceptProposalService,
+  fetchProposalById
 };

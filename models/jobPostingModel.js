@@ -42,8 +42,15 @@ const Job = sequelize.define(
       onDelete: "CASCADE", // Optional: Deletes the client profile if the associated user is deleted
       onUpdate: "CASCADE", // Optional: Updates the client profile if the associated user's ID changes
     },
+    status: {
+      type: DataTypes.ENUM("pending", "ongoing", "completed", "disputed"),
+      defaultValue: "pending",
+      allowNull: false,
+    },
     payment_status: {
-      type: DataTypes.ENUM("unpaid", "paid", "escrowed"),
+      type: DataTypes.ENUM("unpaid", "pending", "escrowed", "released", "disputed"),
+      defaultValue: "unpaid",
+      allowNull: false,
     },
   },
   {

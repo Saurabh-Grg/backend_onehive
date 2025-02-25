@@ -17,6 +17,8 @@ router.get('/client', authenticateUser, proposalController.getProposalsForClient
 // Route to get total proposals for client
 router.get('/total-proposals', authenticateUser, proposalController.getTotalProposalsForClient);
 
+// Route to accept a proposal (client only)
+router.post('/accept/:proposal_id', authenticateUser, proposalController.acceptProposal);
 
 
 module.exports = router;

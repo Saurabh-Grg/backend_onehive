@@ -43,6 +43,10 @@ const Proposal = sequelize.define('Proposal', {
     type: DataTypes.DECIMAL(10, 2),
     defaultValue: 0.0,
   },
+  // cover_letter: {
+  //   type: DataTypes.STRING, // Store the file path or URL for the cover letter PDF
+  //   allowNull: true,
+  // },
   createdAt: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW,

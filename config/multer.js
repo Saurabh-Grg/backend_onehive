@@ -21,6 +21,8 @@ const storage = multer.diskStorage({
       folder = 'uploads/certificates';
     } else if (file.fieldname === 'portfolioImages') {
       folder = 'uploads/portfolio-images';
+    } else if (file.fieldname === 'coverLetter') {
+      folder = 'uploads/cover-letters'; // Add cover letter folder
     }
 
     // Log folder and file info for debugging
@@ -72,6 +74,17 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
+// File filter for cover letter uploads (only PDF)
+const coverLetterFileFilter = (req, file, cb) => {
+  const allowedMimeTypes = ['application/pdf'];
+
+  if (allowedMimeTypes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error('Invalid file type. Only PDF files are allowed.'));
+  }
+};
+
 // File filter for chat file uploads (Supports images, videos, audio, and documents)
 const chatFileFilter = (req, file, cb) => {
   const allowedMimeTypes = [
@@ -92,6 +105,9 @@ const limits = { fileSize: 5 * 1024 * 1024 }; // 5MB size limit per file
 
 const chatLimits = { fileSize: 10 * 1024 * 1024 }; // 10MB for chat files
 
+const coverLetterLimits = { fileSize: 10 * 1024 * 1024 }; // 10MB size limit for cover letter
+
+
 
 // Combine the multer configuration with field-specific limits
 const upload = multer({
@@ -102,6 +118,7 @@ const upload = multer({
   { name: 'profileImage', maxCount: 1 }, // Allow only 1 profile image
   { name: 'certificates', maxCount: 10 }, // Allow up to 5 certificate images
   { name: 'portfolioImages', maxCount: 10 }, // Allow up to 10 portfolio images
+  { name: 'coverLetter', maxCount: 1 }, // Allow only 1 cover letter
 ]);
 // console.log("Multer configuration initialized");
 

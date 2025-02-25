@@ -225,6 +225,9 @@ const getJobDetails = async (req, res) => {
 const getAllJobs = async (req, res) => {
     try {
         const jobs = await Job.findAll({
+            where: {
+                status: 'pending',
+            },
             include: [
                 {
                     model: User,
@@ -250,6 +253,7 @@ const getAllJobs = async (req, res) => {
             title: job.title,
             description: job.description,
             category: job.category,
+            status: job.status,
             client_id: job.user?.clientProfile?.id || null, // Get client profile id
             client_name: job.user?.clientProfile?.contactPerson || 'Unknown', // Get client name
             client_profile_picture: job.user?.clientProfile?.profileImageUrl || '', // Get client profile picture
