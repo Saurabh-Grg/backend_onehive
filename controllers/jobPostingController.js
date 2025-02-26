@@ -168,7 +168,7 @@ const getJobs = async (req, res) => {
 
         // Fetch jobs where user_id matches the client's ID
         const jobs = await Job.findAll({
-            where: { user_id: user_id }
+            where: { user_id: user_id }, // Filter by user_id and status
         });
 
         // If no jobs found, return a message

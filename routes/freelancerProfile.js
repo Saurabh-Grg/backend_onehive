@@ -9,7 +9,7 @@ const { upload } = require('../config/multer'); // Assuming multer is used for f
 const authenticateUser = require('../middleware/auth');
 const FreelancerProfile = require('../models/freelancerProfileModel'); // Adjust path as needed
 const JobPosting = require('../models/jobPostingModel'); // Import JobPosting model
-const Proposal = require('../models/ProposalModel'); // Import Proposal model
+const Proposal = require('../models/proposalModel'); // Import Proposal model
 const User = require('../models/userModel');
 
 // Route for creating freelancer profile
