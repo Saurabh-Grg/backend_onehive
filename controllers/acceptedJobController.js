@@ -4,12 +4,16 @@ const User = require('../models/userModel');
 
 const getAcceptedJobs = async (req, res) => {
   try {
+    // Get the authenticated client's user_id
+    const clientId = req.user.user_id;  // Assuming `req.user.user_id` is set by authenticateUser middleware
+
     const acceptedJobs = await AcceptedJob.findAll({
       include: [
         {
           model: Job,
           attributes: ['title', 'category', 'description', 'payment_status', ], // Fetch job title & description
           as: 'job',
+          where: { user_id: clientId }
         },
         {
           model: User,
