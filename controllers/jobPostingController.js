@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 // const User = require('../models/jobPostingModel');
 // const ClientProfile = require('../models/clientProfileModel'); // Ensure this path is correct
 const { Job, User, ClientProfile } = require('../models'); // Ensure you import correctly
-
+const LikedJob = require('../models/likedJobModel');
 
 const storeTempJobDetails = (req, res) => {
     try {
@@ -270,23 +270,31 @@ const deleteJob = async (req, res) => {
     const { job_id } = req.params;
   
     try {
+      // Find the job by its ID
       const job = await Job.findByPk(job_id);
   
       if (!job) {
         return res.status(404).json({ message: 'Job not found' });
       }
   
+      // Check if the authenticated user is the client who posted the job
       if (job.user_id !== req.user.user_id) {
         return res.status(403).json({ message: 'Unauthorized' });
       }
   
+      // First, delete the related liked_jobs records
+      await LikedJob.destroy({
+        where: { job_id: job_id },
+      });
+  
+      // Now, delete the job
       await job.destroy();
+      
       res.status(200).json({ message: 'Job deleted successfully' });
     } catch (error) {
       res.status(500).json({ message: 'Server error', error: error.message });
     }
   };
-  
 
 
 module.exports = {
