@@ -255,7 +255,7 @@ const getAllJobs = async (req, res) => {
             category: job.category,
             status: job.status,
             client_id: job.user?.clientProfile?.id || null, // Get client profile id
-            client_name: job.user?.clientProfile?.contactPerson || 'Unknown', // Get client name
+            client_name: job.user?.clientProfile?.contactPerson || 'Unknown Client', // Get client name
             client_profile_picture: job.user?.clientProfile?.profileImageUrl || '', // Get client profile picture
         }));
 

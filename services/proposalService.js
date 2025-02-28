@@ -2,6 +2,7 @@
 const Job = require('../models/jobPostingModel');
 const User = require('../models/userModel');
 const Proposal = require('../models/proposalModel');
+const AcceptedJob = require('../models/acceptedJobModel');
 
 async function submitProposal(data) {
   const { job_id, freelancer_id, name, budget, use_escrow } = data;
@@ -99,6 +100,18 @@ async function fetchProposalById(proposalId) {
     if (job.user_id !== clientId) {
         return { error: "You are not authorized to accept this proposal." };
     }
+
+    // Store proposal details in AcceptedJobs table
+    await AcceptedJob.create({
+      job_id: proposal.job_id,
+      client_id: clientId,
+      freelancer_id: proposal.freelancer_id,
+      budget: proposal.budget,
+      use_escrow: proposal.use_escrow,
+      escrow_charge: proposal.escrow_charge,
+      status: "ongoing",
+  });
+
 
     // Update job status to "ongoing"
     await Job.update({ status: "ongoing" }, { where: { job_id: job.job_id } });
