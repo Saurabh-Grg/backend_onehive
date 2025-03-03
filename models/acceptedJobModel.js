@@ -41,6 +41,15 @@ const AcceptedJob = sequelize.define('AcceptedJob', {
     type: DataTypes.ENUM("ongoing", "completed", "disputed"),
     defaultValue: "ongoing",
   },
+  progress: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+    validate: {
+      min: 0,
+      max: 100,
+    },
+  },
+
   createdAt: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW,

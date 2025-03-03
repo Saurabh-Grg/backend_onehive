@@ -69,10 +69,12 @@ const getAcceptedJobsForFreelancer = async (req, res) => {
         ],
         where: { freelancer_id: freelancerId }, // Fetch jobs where the freelancer was accepted
         attributes: [
+          'accepted_job_id',
           'budget',
           'use_escrow',
           'escrow_charge',
           'status',
+          'progress',
           'createdAt',
           'updatedAt'
         ]

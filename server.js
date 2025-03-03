@@ -244,6 +244,7 @@ const followRoutes = require("./routes/followRoutes");
 const notificationsRoutes = require("./routes/notificationRoutes");
 const paymentRoutes = require("./routes/payment");
 const acceptedJobRoutes = require("./routes/acceptedJob");
+const milestoneRoutes = require("./routes/milestoneRoutes");
 
 app.use("/payment", paymentRoutes);
 app.use("/api/auth", authRoutes);
@@ -255,6 +256,7 @@ app.use("/api/liked-jobs", likedJobsRoutes);
 app.use("/api/follow", followRoutes);
 app.use("/api/notifications", notificationsRoutes);
 app.use("/api/acceptedJobs", acceptedJobRoutes);
+app.use("/api/milestones", milestoneRoutes);
 
 // Swagger Documentation
 const { swaggerDocs, swaggerUi } = require("./config/swagger");
